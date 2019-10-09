@@ -1,2 +1,2 @@
 # Stanford AI Graduate Courses
-Repository of taken Stanford AI graduate courses with my assignment solutions and notes. https://scpd.stanford.edu/public/category/courseCategoryCertificateProfile.do?method=load&certificateId=1226717
+Repository of taken Stanford AI graduate courses with my assignment solutions and notes. Links and more information on each course can be found in their respective directories.
