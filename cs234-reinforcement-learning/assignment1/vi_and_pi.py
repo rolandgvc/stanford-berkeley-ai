@@ -55,7 +55,21 @@ def policy_evaluation(P, nS, nA, policy, gamma=0.9, tol=1e-3):
 
 	############################
 	# YOUR IMPLEMENTATION HERE #
+	k = 0
+	next_states = np.array([np.array(next_s) for 
+		next_s in [P[s][a] for s, a in enumerate(policy)]])
+	rewards = np.array([np.sum(s[:, 0] * s[:, 2]) for s in next_states])
 
+	p_policy = np.zeros((nS, nS))
+	for s, a in enumerate(policy):
+		for i in P[s][a]:
+			p_policy[s][i[1]] += i[0]
+
+	prev_value_function = np.copy(value_function)
+	while np.max(np.abs(value_function - prev_value_function)) > tol or k == 0:
+		prev_value_function = np.copy(value_function)
+		value_function = rewards + gamma * p_policy @ prev_value_function
+		k += 1
 
 	############################
 	return value_function
@@ -85,8 +99,17 @@ def policy_improvement(P, nS, nA, value_from_policy, policy, gamma=0.9):
 
 	############################
 	# YOUR IMPLEMENTATION HERE #
+	r = np.zeros((nS, nA))
+	p = np.zeros((nS, nA, nS))
 
+	for s in range(nS):
+		for a in range(nA):
+			for next_s in P[s][a]:
+				r[s][a] += next_s[0] * next_s[2]
+				p[s, a, next_s[1]] += next_s[0]
 
+	q = r + gamma * (p @ value_from_policy)
+	new_policy = q.argmax(axis = 1)
 	############################
 	return new_policy
 
@@ -114,7 +137,13 @@ def policy_iteration(P, nS, nA, gamma=0.9, tol=10e-3):
 
 	############################
 	# YOUR IMPLEMENTATION HERE #
-
+	i = 0
+	prev_policy = np.copy(policy)
+	while i == 0 or np.linalg.norm(policy - prev_policy, ord = 1) > 0:
+		prev_policy = np.copy(policy)
+		value_function = policy_evaluation(P, nS, nA, policy, gamma, tol)
+		policy = policy_improvement(P, nS, nA, value_function, policy, gamma)
+		i += 1
 
 	############################
 	return value_function, policy
@@ -141,7 +170,23 @@ def value_iteration(P, nS, nA, gamma=0.9, tol=1e-3):
 	policy = np.zeros(nS, dtype=int)
 	############################
 	# YOUR IMPLEMENTATION HERE #
+	r = np.zeros((nS, nA))
+	p = np.zeros((nS, nA, nS))
 
+	for s in range(nS):
+		for a in range(nA):
+			for next_s in P[s][a]:
+				r[s][a] += next_s[0] * next_s[2]
+				p[s, a, next_s[1]] += next_s[0]
+
+	k = 0
+	prev_value_function = np.copy(value_function)
+	while k == 0 or np.max(np.abs(value_function - prev_value_function)) > tol:
+		prev_value_function = np.copy(value_function)
+		value_function = np.max(r + gamma * (p @ value_function), axis = 1)
+		k += 1
+
+	policy = np.argmax(r + gamma * p @ value_function, axis = 1)
 
 	############################
 	return value_function, policy
@@ -170,7 +215,7 @@ def render_single(env, policy, max_steps=100):
     episode_reward += rew
     if done:
       break
-  env.render();
+  env.render()
   if not done:
     print("The agent didn't reach a terminal state in {} steps.".format(max_steps))
   else:
@@ -183,8 +228,10 @@ def render_single(env, policy, max_steps=100):
 if __name__ == "__main__":
 
 	# comment/uncomment these lines to switch between deterministic/stochastic environments
-	env = gym.make("Deterministic-4x4-FrozenLake-v0")
-	# env = gym.make("Stochastic-4x4-FrozenLake-v0")
+	#env = gym.make("Deterministic-4x4-FrozenLake-v0")
+	env = gym.make("Stochastic-4x4-FrozenLake-v0")
+
+	
 
 	print("\n" + "-"*25 + "\nBeginning Policy Iteration\n" + "-"*25)
 
