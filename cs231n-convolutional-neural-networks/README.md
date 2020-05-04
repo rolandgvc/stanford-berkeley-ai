@@ -1,5 +1,5 @@
-# Stanford CS229: Machine Learning (Autumn 2018)
-http://cs229.stanford.edu
+# Stanford CS231N: Convolutional Neural Networks for Visual Recognition (Spring 2019)
+http://cs231n.stanford.edu
 
 
 
